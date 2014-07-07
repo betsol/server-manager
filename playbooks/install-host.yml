@@ -1,0 +1,19 @@
+- name: Loading host configuration file
+  include_vars: hosts/{{ host_name }}.yml
+
+- name: User for host exists
+  user: name=www.{{ host_name }} state=present createhome=no home=/noneexistent shell=/usr/sbin/nologin
+
+- stat: path=/var/www/{{ host_name }}
+  register: st
+- name: Host directory exists
+  synchronize: src=templates/host-root/ dest=/var/www/{{ host_name }} rsync_opts=--ignore-existing
+  when: not st.stat.exists
+
+- name: Host configuration is installed NGINX
+  template: src=templates/nginx/host.conf.j2 dest=/etc/nginx/sites-available/{{ host_name }}.conf
+  notify: nginx restart
+
+- name: Pool config is installed for PHP FPM
+  template: src=templates/php-fpm/pool.conf.j2 dest=/etc/php5/fpm/pool.d/{{ host_name }}.conf
+  notify: php-fpm restart

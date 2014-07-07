@@ -1,0 +1,13 @@
+- name: User for NGINX exists
+  user: name=nginx state=present createhome=no home=/noneexistent shell=/usr/sbin/nologin
+
+- name: NGINX web server is installed
+  apt: name=nginx state=latest update_cache=yes
+
+- name: User is set it NGINX configuration file
+  lineinfile: dest=/etc/nginx/nginx.conf line="user nginx;" state=present regexp="^\s*user\s+"
+  notify: nginx restart
+
+- name: Security configuration is installed for NGINX
+  template: src=templates/nginx/security.conf.j2 dest=/etc/nginx/conf.d/security.conf
+  notify: nginx restart

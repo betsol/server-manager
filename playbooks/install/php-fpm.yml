@@ -1,0 +1,9 @@
+- name: Directory for PHP FPM sockets exists
+  file: path=/var/run/php-fpm state=directory
+
+- name: PHP FPM is installed
+  apt: name=php5-fpm state=latest update_cache=yes
+
+- name: Configuration is installed for PHP FPM
+  template: src=templates/php-fpm/security.ini.j2 dest=/etc/php5/fpm/conf.d/90-security.ini
+  notify: php-fpm restart

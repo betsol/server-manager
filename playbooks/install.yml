@@ -1,0 +1,5 @@
+- name: Root directory for hosts exists
+  file: path=/var/www state=directory
+
+- include: install/php-fpm.yml
+- include: install/nginx.yml

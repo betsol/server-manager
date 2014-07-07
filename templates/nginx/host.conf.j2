@@ -1,0 +1,63 @@
+server {
+    listen 80;
+
+    {% if hostname.aliases %}
+        server_name {{ host_name }} {{ hostname.aliases|join(' ') }};
+    {% else %}
+        server_name {{ host_name }};
+    {% endif %}
+
+    root /var/www/{{ host_name }}/web;
+
+    # removing trailing dot
+    if ($http_host ~ "\.$" ) {
+        rewrite ^(.*) $scheme://$host$1 permanent;
+    }
+
+    {% if hostname.canonical is defined  %}
+        # redirecting to a canonical domain name
+        if ($host != "{{ hostname.canonical }}") {
+            rewrite ^(.*) $scheme://{{ hostname.canonical }}$1 permanent;
+        }
+    {% endif %}
+
+    index index.php index.html;
+
+    location / {
+        # try to serve file directly, fallback to rewrite
+        try_files $uri $uri/ =404;
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass unix:/var/run/php5-fpm/{{ host_name }}.sock;
+        fastcgi_split_path_info ^(.+\.php)(/.*)$;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param HTTPS off;
+        fastcgi_buffer_size 128k;
+        fastcgi_buffers 4 256k;
+        fastcgi_busy_buffers_size 256k;
+    }
+
+    gzip on;
+    gzip_http_version 1.1;
+    gzip_vary on;
+    gzip_comp_level 6;
+    gzip_proxied any;
+
+    gzip_types
+        text/plain
+        text/css
+        application/json
+        application/x-javascript
+        text/xml
+        application/xml
+        application/xml+rss
+        text/javascript
+        application/javascript
+        text/x-js
+    ;
+
+    gzip_buffers 16 8k;
+    gzip_disable "MSIE [1-6]\.(?!.*SV1)";
+}

@@ -1,0 +1,6 @@
+hostname:
+    aliases:
+      - www.example.com
+      - foo.example.com
+      - bar.example.com
+    canonical: www.example.com

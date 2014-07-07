@@ -1,0 +1,12 @@
+- hosts: 127.0.0.1
+  connection: local
+  tasks:
+    - name: Running tasks
+      include: playbooks/{{ task_name }}.yml
+
+  handlers:
+    - name: nginx restart
+      service: name=nginx state=restarted
+
+    - name: php-fpm restart
+      service: name=php5-fpm state=restarted

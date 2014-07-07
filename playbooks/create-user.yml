@@ -1,0 +1,2 @@
+- name: User exists
+  user: name=www.{{ host_name }} state=present createhome=no home=/noneexistent shell=/usr/sbin/nologin
