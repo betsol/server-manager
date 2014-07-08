@@ -1,7 +1,7 @@
 server {
     listen 80;
 
-    {% if hostname.aliases %}
+    {% if hostname is defined and hostname.aliases is defined and hostname.aliases %}
         server_name {{ host_name }} {{ hostname.aliases|join(' ') }};
     {% else %}
         server_name {{ host_name }};
@@ -14,7 +14,7 @@ server {
         rewrite ^(.*) $scheme://$host$1 permanent;
     }
 
-    {% if hostname.canonical is defined  %}
+    {% if hostname is defined and hostname.canonical is defined  %}
         # redirecting to a canonical domain name
         if ($host != "{{ hostname.canonical }}") {
             rewrite ^(.*) $scheme://{{ hostname.canonical }}$1 permanent;
@@ -29,7 +29,7 @@ server {
     }
 
     location ~ \.php$ {
-        fastcgi_pass unix:/var/run/php5-fpm/{{ host_name }}.sock;
+        fastcgi_pass unix:/var/run/php-fpm/{{ host_name }}.sock;
         fastcgi_split_path_info ^(.+\.php)(/.*)$;
         include fastcgi_params;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
@@ -60,4 +60,7 @@ server {
 
     gzip_buffers 16 8k;
     gzip_disable "MSIE [1-6]\.(?!.*SV1)";
+
+    # Logging configuration.
+    error_log /var/www/{{ host_name }}/var/logs/nginx/error.log info;
 }

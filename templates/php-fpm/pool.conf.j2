@@ -1,10 +1,10 @@
 [{{ host_name }}]
 
-user = www.{{ host_name }}
-group = www.{{ host_name }}
-listen = /var/run/php5-fpm/{{ host_name }}.sock
-listen.owner = www-data
-listen.group = www-data
+user = fpm-{{ host_name }}
+group = fpm-{{ host_name }}
+listen = /var/run/php-fpm/{{ host_name }}.sock
+listen.owner = nginx
+listen.group = nginx
 
 pm = dynamic
 pm.max_children = 5
@@ -13,3 +13,9 @@ pm.min_spare_servers = 1
 pm.max_spare_servers = 3
 
 catch_workers_output = yes
+
+# Logging
+error_log = /var/www/{{ host_name }}/var/logs/php-fpm/errors.log
+php_flag[display_errors] = off
+php_admin_value[error_log] = /var/www/{{ host_name }}/var/logs/php-fpm/errors.log
+php_admin_flag[log_errors] = on

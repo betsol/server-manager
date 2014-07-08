@@ -1,6 +1,56 @@
+# Domain names configuration.
 hostname:
+    # List of alternative names for your host.
+    # No need to specify primary domain name as it specified in host config filename.
     aliases:
       - www.example.com
-      - foo.example.com
-      - bar.example.com
+      - example.net
+      - www.example.net
+
+    # Canonical domain name, all other aliases will be redirected to this one.
     canonical: www.example.com
+
+# Relative directories that will be created.
+create:
+  - /upload
+  - /data/userpics
+  - /data/gallery
+
+# Relative directories that must be writable by PHP FPM.
+writable:
+  - /upload
+  - /data
+
+# Additional configuration for Unix users.
+# You need to create appropriate users first.
+users:
+  - username: sfomin
+
+    # You can set custom permissions for relative paths.
+    # This is useful if you want to edit files directly on server.
+    access:
+      - path: /
+        permissions: rwX
+        recursive: true
+
+  - username: vgaintsev
+    access:
+      - path: /
+        permissions: rX
+
+      - path: /css
+        permissions: rwX
+        recursive: true
+
+      - path: /data
+        permissions: rX
+        recursive: true
+
+      - path: /data/reviews.yml
+        permissions: rw
+
+      - path: /js
+        permissions: rX
+
+      - path: /js/*.js
+        permissions: rw

@@ -1,0 +1,56 @@
+- name: Loading host configuration file
+  include_vars: hosts/{{ host_name }}.yml
+
+
+- name: Setting permissions for web root directory for FPM user
+  shell: setfacl -m u:fpm-{{ host_name }}:X /var/www
+
+
+- name: Setting permissions for host directory for FPM user
+  shell: setfacl -R -m u:fpm-{{ host_name }}:rX /var/www/{{ host_name }}
+
+- name: Setting default permissions for host directory for FPM user
+  shell: setfacl -d -R -m u:fpm-{{ host_name }}:rX /var/www/{{ host_name }}
+
+
+- name: Setting permissions for writable directory for FPM user
+  shell: setfacl -R -m u:fpm-{{ host_name }}:rwX /var/www/{{ host_name }}/var
+
+- name: Setting default permissions for writable directory for FPM user
+  shell: setfacl -d -R -m u:fpm-{{ host_name }}:rwX /var/www/{{ host_name }}/var
+
+
+- name: Allowing NGINX to write logs
+  shell: setfacl -R -m u:nginx:rwX /var/www/{{ host_name }}/var/logs/nginx
+
+- name: Allowing NGINX to write logs (default)
+  shell: setfacl -d -R -m u:nginx:rwX /var/www/{{ host_name }}/var/logs/nginx
+
+
+- name: Setting permissions for writable directory for FPM user
+  shell: setfacl -R -m u:fpm-{{ host_name }}:rwX /var/www/{{ host_name }}/{{ item }}
+  with_items: writable
+  when: "{% if writable is defined %}true{% else %}false{% endif %}"
+
+- name: Setting default permissions for writable directory for FPM user
+  shell: setfacl -d -R -m u:fpm-{{ host_name }}:rwX /var/www/{{ host_name }}/{{ item }}
+  with_items: writable
+  when: "{% if writable is defined %}true{% else %}false{% endif %}"
+
+
+- name: Setting permissions for web root directory for custom user
+  shell: setfacl -m u:{{ item.username }}:rX /var/www/
+  with_items: users
+
+
+- name: Setting permissions for custom directory for custom user
+  shell: setfacl {% if item.1.recursive|default(false) %}-R{% endif %} -m u:{{ item.0.username }}:{{ item.1.permissions }} /var/www/{{ host_name }}/{{ item.1.path }}
+  with_subelements:
+    - users
+    - access
+
+- name: Setting default permissions for custom directory for custom user
+  shell: "{% if item.1.recursive|default(false) %}setfacl -d -R -m u:{{ item.0.username }}:{{ item.1.permissions }} /var/www/{{ host_name }}/{{ item.1.path }}{% else %}:{% endif %}"
+  with_subelements:
+    - users
+    - access
