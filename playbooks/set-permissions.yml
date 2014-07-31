@@ -4,8 +4,8 @@
 - name: Basic permissions are set for web root directory
   shell: chmod -R ug=rX,o= /var/www
 
-#- name: Removing all ACL permissions for web root directory
-#  shell: setfacl -R -b /var/www
+- name: Setting default permissions for owner
+  shell: setfacl -d -R -m u::rwX /var/www/
 
 - name: Setting permissions for web root directory for NGINX user
   shell: setfacl -R -m u:nginx:rX /var/www
